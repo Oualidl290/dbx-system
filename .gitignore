@@ -126,3 +126,31 @@ temp/
 reports/*.png
 reports/*.pdf
 reports/*.html
+
+# Large Files (GitHub limit is 100MB)
+*.tar
+*.tar.gz
+*.zip
+*.rar
+*.7z
+*.iso
+*.dmg
+*.pkg
+*.deb
+*.rpm
+
+# Large datasets and backups
+*.csv
+*.json
+*.xml
+*.parquet
+backup/
+backups/
+*.backup
+*.bak
+
+# Database dumps
+*.sql
+*.dump
+database/credentials.txt
+database/api_key.txt
