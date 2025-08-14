@@ -1,0 +1,4 @@
+# Database requirements for DBX AI System
+psycopg2-binary>=2.9.7
+sqlalchemy>=2.0.0
+alembic>=1.12.0

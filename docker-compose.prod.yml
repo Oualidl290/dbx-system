@@ -1,0 +1,98 @@
+# DBX AI System - Production Docker Compose
+# Optimized for sharing and production deployment
+
+version: '3.8'
+
+services:
+  # Main AI Engine
+  dbx-ai-engine:
+    image: oualidl290/dbx-ai-system:latest
+    container_name: dbx-ai-engine
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - REDIS_URL=redis://dbx-redis:6379
+      - MODEL_VERSION=2.0.0
+      - WORKERS=2
+      - LOG_LEVEL=INFO
+    volumes:
+      - ai_data:/app/data
+      - ai_reports:/app/reports
+    depends_on:
+      - dbx-redis
+    networks:
+      - dbx-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+  # Redis Cache
+  dbx-redis:
+    image: redis:7-alpine
+    container_name: dbx-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - dbx-network
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+
+  # Nginx Reverse Proxy (Optional for production)
+  dbx-nginx:
+    image: nginx:alpine
+    container_name: dbx-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - dbx-ai-engine
+    networks:
+      - dbx-network
+    profiles:
+      - production
+
+# Named volumes for data persistence
+volumes:
+  ai_data:
+    driver: local
+  ai_reports:
+    driver: local
+  redis_data:
+    driver: local
+
+# Custom network
+networks:
+  dbx-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
