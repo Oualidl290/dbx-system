@@ -1,5 +1,18 @@
 # Security & Production Deployment Guide
 
+## ⚠️ **NEVER DO THIS IN PRODUCTION**
+
+| ❌ **Security Anti-Pattern** | ✅ **Correct Approach** |
+|------------------------------|-------------------------|
+| Commit `.env` files to git | Use `.env.example` + secrets manager |
+| Hard-code API keys in source | Environment variables + vault |
+| Disable TLS/HTTPS | Always use TLS certificates |
+| Run containers as root | Use non-root user (already implemented) |
+| Expose internal ports | Use reverse proxy (nginx/traefik) |
+| Skip input validation | Validate all file uploads & API inputs |
+
+**Why this matters**: A single committed API key can cost thousands in unauthorized usage.
+
 ## 🔐 Environment Variables & Secrets
 
 ### Development Setup
