@@ -1,13 +1,31 @@
-name: CI/CD Pipeline
+name: 🚀 Enterprise CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, staging ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
+  release:
+    types: [ published ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  # 🧪 TESTING & QUALITY ASSURANCE
   test:
+    name: 🧪 Test & Quality Check
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -45,60 +63,223 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     
-    - name: Install dependencies
+    - name: 📦 Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -e .[dev,test]
     
-    - name: Lint with flake8
+    - name: 🔍 Security scan - Dependencies
       run: |
-        flake8 app tests --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 app tests --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
+        pip install safety bandit
+        safety check
+        bandit -r src/ -f json -o bandit-report.json || true
     
-    - name: Format check with black
-      run: black --check app tests
+    - name: 🎨 Code formatting check
+      run: black --check src/ tests/
     
-    - name: Type check with mypy
-      run: mypy app
-    
-    - name: Test with pytest
+    - name: 📏 Lint with flake8
       run: |
-        pytest tests/ --cov=app --cov-report=xml
+        flake8 src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 src/ tests/ --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
+    
+    - name: 🔍 Type checking
+      run: mypy src/ --ignore-missing-imports
+    
+    - name: 🧪 Run tests
+      run: |
+        pytest tests/ --cov=src --cov-report=xml --cov-report=html --junitxml=pytest.xml
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_dbx_aviation
         REDIS_URL: redis://localhost:6379
+        ENVIRONMENT: testing
     
-    - name: Upload coverage to Codecov
+    - name: 📊 Upload coverage reports
       uses: codecov/codecov-action@v3
       with:
         file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+    
+    - name: 📈 Publish test results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: pytest.xml
 
+  # 🏗️ BUILD & SECURITY SCAN
   build:
+    name: 🏗️ Build & Security Scan
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+    
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      image-uri: ${{ steps.build.outputs.image-uri }}
     
     steps:
-    - uses: actions/checkout@v4
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
     
-    - name: Build Docker image
-      run: |
-        docker build -t dbx-ai-aviation:${{ github.sha }} .
-        docker tag dbx-ai-aviation:${{ github.sha }} dbx-ai-aviation:latest
+    - name: 🔐 Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: Run security scan
-      run: |
-        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-          -v $PWD:/root/.cache/ aquasec/trivy:latest image \
-          --exit-code 0 --severity HIGH,CRITICAL \
-          dbx-ai-aviation:${{ github.sha }}
+    - name: 🏷️ Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+    
+    - name: 🔧 Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: 🏗️ Build and push Docker image
+      id: build
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: deployment/docker/Dockerfile.production
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+    
+    - name: 🔍 Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    
+    - name: 📊 Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
 
-  deploy:
+  # 🚀 DEPLOYMENT TO STAGING
+  deploy-staging:
+    name: 🚀 Deploy to Staging
     needs: [test, build]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/staging'
+    environment:
+      name: staging
+      url: https://staging.dbx-ai.com
     
     steps:
-    - name: Deploy to staging
-      run: echo "Deploy to staging environment"
-      # Add your deployment steps here
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🔧 Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.28.0'
+    
+    - name: 🔐 Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-west-2
+    
+    - name: 🎯 Deploy to EKS Staging
+      run: |
+        aws eks update-kubeconfig --region us-west-2 --name dbx-staging-cluster
+        envsubst < deployment/kubernetes/staging.yaml | kubectl apply -f -
+      env:
+        IMAGE_TAG: ${{ github.sha }}
+        ENVIRONMENT: staging
+    
+    - name: ✅ Verify deployment
+      run: |
+        kubectl rollout status deployment/dbx-ai-aviation -n staging
+        kubectl get services -n staging
+
+  # 🏭 DEPLOYMENT TO PRODUCTION
+  deploy-production:
+    name: 🏭 Deploy to Production
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.event_name == 'release'
+    environment:
+      name: production
+      url: https://api.dbx-ai.com
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🔧 Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.28.0'
+    
+    - name: 🔐 Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-west-2
+    
+    - name: 🎯 Deploy to EKS Production
+      run: |
+        aws eks update-kubeconfig --region us-west-2 --name dbx-production-cluster
+        envsubst < deployment/kubernetes/production.yaml | kubectl apply -f -
+      env:
+        IMAGE_TAG: ${{ github.sha }}
+        ENVIRONMENT: production
+    
+    - name: ✅ Verify deployment
+      run: |
+        kubectl rollout status deployment/dbx-ai-aviation -n production
+        kubectl get services -n production
+    
+    - name: 🔔 Notify deployment success
+      uses: 8398a7/action-slack@v3
+      with:
+        status: success
+        text: '🚀 DBX AI Aviation System deployed to production successfully!'
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # 🧪 INTEGRATION TESTS
+  integration-tests:
+    name: 🧪 Integration Tests
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/staging'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: 📦 Install test dependencies
+      run: |
+        pip install pytest httpx python-dotenv
+    
+    - name: 🧪 Run integration tests
+      run: |
+        pytest tests/integration/ -v --tb=short
+      env:
+        API_BASE_URL: https://staging.dbx-ai.com
+        API_KEY: ${{ secrets.STAGING_API_KEY }}

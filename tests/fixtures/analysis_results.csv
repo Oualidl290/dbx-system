@@ -1,0 +1,267 @@
+session_id,aircraft_id,predicted_aircraft_type,aircraft_confidence,actual_aircraft_type,classification_correct,anomaly_count,anomaly_rate,risk_score,risk_level,risk_factors,ai_report
+FL_0000,AC_025,vtol,0.8044000000000001,vtol,True,5,0.1,0.75,critical,"['High anomaly rate detected', 'Motor overheating detected', 'Excessive vibration detected']","🤖 AI FLIGHT ANALYSIS REPORT
+Flight: FL_0000
+Aircraft: AC_025 (vtol)
+Duration: 34.9 minutes
+
+AIRCRAFT CLASSIFICATION:
+✅ Detected Type: vtol
+✅ Confidence: 80.4%
+✅ Actual Type: vtol
+✅ Match: Yes
+
+ANOMALY DETECTION:
+⚠️ Anomalies Found: 5
+⚠️ Anomaly Rate: 10.0%
+
+RISK ASSESSMENT:
+🎯 Risk Score: 0.75
+🎯 Risk Level: CRITICAL
+🎯 Risk Factors: 3
+   • High anomaly rate detected
+   • Motor overheating detected
+   • Excessive vibration detected
+
+RECOMMENDATIONS:
+   • 🚨 IMMEDIATE ACTION REQUIRED - Ground aircraft for inspection
+   • 🔍 Detailed telemetry analysis recommended
+   • 🔧 Inspect motor cooling systems
+   • 🔧 Check propeller balance and motor mounts"
+FL_0001,AC_045,multirotor,0.6347999999999999,multirotor,True,3,0.06,0.75,critical,"['High anomaly rate detected', 'Motor overheating detected', 'Excessive vibration detected']","🤖 AI FLIGHT ANALYSIS REPORT
+Flight: FL_0001
+Aircraft: AC_045 (multirotor)
+Duration: 11.7 minutes
+
+AIRCRAFT CLASSIFICATION:
+✅ Detected Type: multirotor
+✅ Confidence: 63.5%
+✅ Actual Type: multirotor
+✅ Match: Yes
+
+ANOMALY DETECTION:
+⚠️ Anomalies Found: 3
+⚠️ Anomaly Rate: 6.0%
+
+RISK ASSESSMENT:
+🎯 Risk Score: 0.75
+🎯 Risk Level: CRITICAL
+🎯 Risk Factors: 3
+   • High anomaly rate detected
+   • Motor overheating detected
+   • Excessive vibration detected
+
+RECOMMENDATIONS:
+   • 🚨 IMMEDIATE ACTION REQUIRED - Ground aircraft for inspection
+   • 🔍 Detailed telemetry analysis recommended
+   • 🔧 Inspect motor cooling systems
+   • 🔧 Check propeller balance and motor mounts"
+FL_0002,AC_009,fixed_wing,0.7006,fixed_wing,True,4,0.08,0.5,high,"['High anomaly rate detected', 'Motor overheating detected']","🤖 AI FLIGHT ANALYSIS REPORT
+Flight: FL_0002
+Aircraft: AC_009 (fixed_wing)
+Duration: 13.1 minutes
+
+AIRCRAFT CLASSIFICATION:
+✅ Detected Type: fixed_wing
+✅ Confidence: 70.1%
+✅ Actual Type: fixed_wing
+✅ Match: Yes
+
+ANOMALY DETECTION:
+⚠️ Anomalies Found: 4
+⚠️ Anomaly Rate: 8.0%
+
+RISK ASSESSMENT:
+🎯 Risk Score: 0.50
+🎯 Risk Level: HIGH
+🎯 Risk Factors: 2
+   • High anomaly rate detected
+   • Motor overheating detected
+
+RECOMMENDATIONS:
+   • ⚠️ Schedule maintenance within 24 hours
+   • 🔍 Detailed telemetry analysis recommended
+   • 🔧 Inspect motor cooling systems"
+FL_0003,AC_021,multirotor,0.774,multirotor,True,9,0.18,0.5,high,"['High anomaly rate detected', 'Motor overheating detected']","🤖 AI FLIGHT ANALYSIS REPORT
+Flight: FL_0003
+Aircraft: AC_021 (multirotor)
+Duration: 12.6 minutes
+
+AIRCRAFT CLASSIFICATION:
+✅ Detected Type: multirotor
+✅ Confidence: 77.4%
+✅ Actual Type: multirotor
+✅ Match: Yes
+
+ANOMALY DETECTION:
+⚠️ Anomalies Found: 9
+⚠️ Anomaly Rate: 18.0%
+
+RISK ASSESSMENT:
+🎯 Risk Score: 0.50
+🎯 Risk Level: HIGH
+🎯 Risk Factors: 2
+   • High anomaly rate detected
+   • Motor overheating detected
+
+RECOMMENDATIONS:
+   • ⚠️ Schedule maintenance within 24 hours
+   • 🔍 Detailed telemetry analysis recommended
+   • 🔧 Inspect motor cooling systems"
+FL_0004,AC_025,vtol,0.6868000000000001,vtol,True,6,0.12,0.75,critical,"['High anomaly rate detected', 'Motor overheating detected', 'Excessive vibration detected']","🤖 AI FLIGHT ANALYSIS REPORT
+Flight: FL_0004
+Aircraft: AC_025 (vtol)
+Duration: 51.2 minutes
+
+AIRCRAFT CLASSIFICATION:
+✅ Detected Type: vtol
+✅ Confidence: 68.7%
+✅ Actual Type: vtol
+✅ Match: Yes
+
+ANOMALY DETECTION:
+⚠️ Anomalies Found: 6
+⚠️ Anomaly Rate: 12.0%
+
+RISK ASSESSMENT:
+🎯 Risk Score: 0.75
+🎯 Risk Level: CRITICAL
+🎯 Risk Factors: 3
+   • High anomaly rate detected
+   • Motor overheating detected
+   • Excessive vibration detected
+
+RECOMMENDATIONS:
+   • 🚨 IMMEDIATE ACTION REQUIRED - Ground aircraft for inspection
+   • 🔍 Detailed telemetry analysis recommended
+   • 🔧 Inspect motor cooling systems
+   • 🔧 Check propeller balance and motor mounts"
+FL_0005,AC_001,helicopter,0.9025999999999997,helicopter,True,5,0.1,0.5,high,"['High anomaly rate detected', 'Motor overheating detected']","🤖 AI FLIGHT ANALYSIS REPORT
+Flight: FL_0005
+Aircraft: AC_001 (helicopter)
+Duration: 6.4 minutes
+
+AIRCRAFT CLASSIFICATION:
+✅ Detected Type: helicopter
+✅ Confidence: 90.3%
+✅ Actual Type: helicopter
+✅ Match: Yes
+
+ANOMALY DETECTION:
+⚠️ Anomalies Found: 5
+⚠️ Anomaly Rate: 10.0%
+
+RISK ASSESSMENT:
+🎯 Risk Score: 0.50
+🎯 Risk Level: HIGH
+🎯 Risk Factors: 2
+   • High anomaly rate detected
+   • Motor overheating detected
+
+RECOMMENDATIONS:
+   • ⚠️ Schedule maintenance within 24 hours
+   • 🔍 Detailed telemetry analysis recommended
+   • 🔧 Inspect motor cooling systems"
+FL_0006,AC_034,vtol,0.8359999999999999,vtol,True,2,0.04,0.45,high,"['Motor overheating detected', 'Excessive vibration detected']","🤖 AI FLIGHT ANALYSIS REPORT
+Flight: FL_0006
+Aircraft: AC_034 (vtol)
+Duration: 47.3 minutes
+
+AIRCRAFT CLASSIFICATION:
+✅ Detected Type: vtol
+✅ Confidence: 83.6%
+✅ Actual Type: vtol
+✅ Match: Yes
+
+ANOMALY DETECTION:
+⚠️ Anomalies Found: 2
+✅ Anomaly Rate: 4.0%
+
+RISK ASSESSMENT:
+🎯 Risk Score: 0.45
+🎯 Risk Level: HIGH
+🎯 Risk Factors: 2
+   • Motor overheating detected
+   • Excessive vibration detected
+
+RECOMMENDATIONS:
+   • ⚠️ Schedule maintenance within 24 hours
+   • 🔧 Inspect motor cooling systems
+   • 🔧 Check propeller balance and motor mounts"
+FL_0007,AC_024,fixed_wing,0.8104000000000002,fixed_wing,True,3,0.06,0.75,critical,"['High anomaly rate detected', 'Motor overheating detected', 'Excessive vibration detected']","🤖 AI FLIGHT ANALYSIS REPORT
+Flight: FL_0007
+Aircraft: AC_024 (fixed_wing)
+Duration: 31.1 minutes
+
+AIRCRAFT CLASSIFICATION:
+✅ Detected Type: fixed_wing
+✅ Confidence: 81.0%
+✅ Actual Type: fixed_wing
+✅ Match: Yes
+
+ANOMALY DETECTION:
+⚠️ Anomalies Found: 3
+⚠️ Anomaly Rate: 6.0%
+
+RISK ASSESSMENT:
+🎯 Risk Score: 0.75
+🎯 Risk Level: CRITICAL
+🎯 Risk Factors: 3
+   • High anomaly rate detected
+   • Motor overheating detected
+   • Excessive vibration detected
+
+RECOMMENDATIONS:
+   • 🚨 IMMEDIATE ACTION REQUIRED - Ground aircraft for inspection
+   • 🔍 Detailed telemetry analysis recommended
+   • 🔧 Inspect motor cooling systems
+   • 🔧 Check propeller balance and motor mounts"
+FL_0008,AC_043,fixed_wing,0.7202000000000001,fixed_wing,True,3,0.06,0.5,high,"['High anomaly rate detected', 'Motor overheating detected']","🤖 AI FLIGHT ANALYSIS REPORT
+Flight: FL_0008
+Aircraft: AC_043 (fixed_wing)
+Duration: 34.0 minutes
+
+AIRCRAFT CLASSIFICATION:
+✅ Detected Type: fixed_wing
+✅ Confidence: 72.0%
+✅ Actual Type: fixed_wing
+✅ Match: Yes
+
+ANOMALY DETECTION:
+⚠️ Anomalies Found: 3
+⚠️ Anomaly Rate: 6.0%
+
+RISK ASSESSMENT:
+🎯 Risk Score: 0.50
+🎯 Risk Level: HIGH
+🎯 Risk Factors: 2
+   • High anomaly rate detected
+   • Motor overheating detected
+
+RECOMMENDATIONS:
+   • ⚠️ Schedule maintenance within 24 hours
+   • 🔍 Detailed telemetry analysis recommended
+   • 🔧 Inspect motor cooling systems"
+FL_0009,AC_027,multirotor,0.7554000000000002,multirotor,True,2,0.04,0.2,medium,['Motor overheating detected'],"🤖 AI FLIGHT ANALYSIS REPORT
+Flight: FL_0009
+Aircraft: AC_027 (multirotor)
+Duration: 29.6 minutes
+
+AIRCRAFT CLASSIFICATION:
+✅ Detected Type: multirotor
+✅ Confidence: 75.5%
+✅ Actual Type: multirotor
+✅ Match: Yes
+
+ANOMALY DETECTION:
+⚠️ Anomalies Found: 2
+✅ Anomaly Rate: 4.0%
+
+RISK ASSESSMENT:
+🎯 Risk Score: 0.20
+🎯 Risk Level: MEDIUM
+🎯 Risk Factors: 1
+   • Motor overheating detected
+
+RECOMMENDATIONS:
+   • 📋 Monitor closely on next flight
+   • 🔧 Inspect motor cooling systems"

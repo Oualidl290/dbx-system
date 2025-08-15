@@ -1,0 +1,14 @@
+{
+  "aircraft_classifier": {
+    "accuracy": 0.709,
+    "features": [
+      "altitude",
+      "speed",
+      "motor_rpm_avg",
+      "motor_rpm_std",
+      "motor_temp_avg",
+      "motor_current_avg",
+      "vibration_magnitude"
+    ]
+  }
+}

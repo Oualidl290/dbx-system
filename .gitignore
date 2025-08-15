@@ -1,9 +1,11 @@
-# Python
+# 🔒 DBX AI Aviation System - Professional .gitignore
+
+# ===============================================
+# 🐍 PYTHON
+# ===============================================
 __pycache__/
 *.py[cod]
 *$py.class
-*.pyc
-*.pyo
 *.so
 .Python
 build/
@@ -18,80 +20,69 @@ parts/
 sdist/
 var/
 wheels/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
-# Virtual Environment
-.venv/
-venv/
-ENV/
-env/
-.conda/
-
-# Environment Variables (CRITICAL - NEVER COMMIT)
+# ===============================================
+# 🔐 SECRETS & CREDENTIALS (NEVER COMMIT!)
+# ===============================================
 .env
 .env.local
 .env.production
 .env.staging
-config.ini
-secrets.yaml
+*.key
+*.pem
+*.p12
+*.pfx
+config/credentials.txt
+config/api_key.txt
+database/credentials.txt
+database/api_key.txt
 
-# Data & Cache (Private flight logs)
+# AWS credentials
+.aws/
+aws-credentials.json
+
+# Database passwords
+db_password.txt
+database_url.txt
+
+# API keys
+openai_key.txt
+gemini_key.txt
+api_keys.json
+
+# ===============================================
+# 🗄️ DATABASES & DATA
+# ===============================================
+*.db
+*.sqlite
+*.sqlite3
+database/backups/
+data/uploads/
 data/cache/
 data/temp/
 data/logs/
-data/uploads/
-data/results/
-data/raw/
-data/private/
-*.pkl
-*.joblib
-*.h5
-*.hdf5
-
-# Model Artifacts
-models/*.pkl
-models/*.joblib
-models/*.h5
-models/checkpoints/
-cache/
-*.model
-*.weights
-
-# Logs & Monitoring
 *.log
-logs/
-monitoring/
-metrics/
 
-# IDE & Editors
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.sublime-*
-*.sublime-workspace
+# ===============================================
+# 🤖 ML MODELS & DATA (TOO LARGE)
+# ===============================================
+data/models/*.pkl
+data/models/*.joblib
+data/models/*.h5
+data/models/*.pt
+data/models/*.pth
+data/training_data/*.csv
+data/training_data/*.parquet
+*.model
 
-# OS Generated
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Docker
-.dockerignore
-docker-compose.override.yml
-
-# Jupyter Notebooks
-.ipynb_checkpoints/
-*.ipynb
-
-# Testing & Coverage
+# ===============================================
+# 🧪 TESTING & REPORTS
+# ===============================================
 .pytest_cache/
 .coverage
 htmlcov/
@@ -99,58 +90,107 @@ htmlcov/
 .nox/
 coverage.xml
 *.cover
+*.py,cover
 .hypothesis/
+test_results/
+reports/
+quick_test_report.json
+bandit-report.json
 
-# Security & Certificates
-secrets/
-*.pem
-*.key
-*.crt
-*.p12
-*.pfx
-api_keys.txt
-credentials.json
+# ===============================================
+# 🏗️ BUILD & DEPLOYMENT
+# ===============================================
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+terraform.tfvars
 
-# Temporary files
+# Docker
+.dockerignore
+
+# Kubernetes secrets
+k8s-secrets.yaml
+secrets.yaml
+
+# ===============================================
+# 📝 EDITORS & IDEs
+# ===============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ===============================================
+# 🖥️ OPERATING SYSTEMS
+# ===============================================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+
+# ===============================================
+# 📦 DEPENDENCIES
+# ===============================================
+node_modules/
+.venv/
+venv/
+env/
+ENV/
+
+# ===============================================
+# 🗂️ TEMPORARY & CACHE
+# ===============================================
 *.tmp
 *.temp
-.tmp/
-temp/
+.cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
 
-# Database
-*.db
-*.sqlite
-*.sqlite3
+# ===============================================
+# 📊 VISUALIZATIONS & OUTPUTS
+# ===============================================
+visualizations/
+*.png
+*.jpg
+*.jpeg
+*.gif
+confusion_matrix.png
+feature_importance.png
 
-# Reports (generated during demo)
-reports/*.png
-reports/*.pdf
-reports/*.html
-
-# Large Files (GitHub limit is 100MB)
-*.tar
-*.tar.gz
-*.zip
-*.rar
-*.7z
-*.iso
-*.dmg
-*.pkg
-*.deb
-*.rpm
-
-# Large datasets and backups
-*.csv
-*.json
-*.xml
-*.parquet
+# ===============================================
+# 🗃️ ARCHIVE & LEGACY (KEEP LOCAL ONLY)
+# ===============================================
+archive/
+legacy/
+old/
 backup/
-backups/
 *.backup
-*.bak
 
-# Database dumps
-*.sql
-*.dump
-database/credentials.txt
-database/api_key.txt
+# ===============================================
+# 🔧 LOCAL DEVELOPMENT
+# ===============================================
+.local/
+local_config.py
+dev_settings.py
+run_refactored.py
+
+# ===============================================
+# 📋 DOCUMENTATION DRAFTS
+# ===============================================
+REFACTORING_*.md
+*_COMPLETE.md
+*_SUMMARY.json
+HONEST_*.md
+CRITICAL_*.md
