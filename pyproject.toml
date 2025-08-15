@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "dbx-ai-aviation"
 version = "2.0.0"
-description = "Production AI system for aviation safety analysis"
+description = "Production AI system for aviation safety analysis - Refactored Structure"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
