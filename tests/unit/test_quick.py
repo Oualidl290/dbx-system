@@ -339,19 +339,19 @@ class DBXQuickTester:
         completeness = (passed_tests / total_tests) * 100
         if completeness >= 90:
             print(f"\n🟢 SYSTEM STATUS: EXCELLENT ({completeness:.1f}%)")
-            print("   🎉 Your DBX AI system is production-ready!")
+            print("   🎉 Our DBX AI system is production-ready!")
             print("   ✅ All core components are in place")
             print("   ✅ Database schema is complete")
             print("   ✅ API structure is ready")
             print("   ✅ Documentation is comprehensive")
         elif completeness >= 75:
             print(f"\n🟡 SYSTEM STATUS: GOOD ({completeness:.1f}%)")
-            print("   👍 Your DBX AI system is mostly complete!")
+            print("   👍 Our DBX AI system is mostly complete!")
             print("   ✅ Core functionality is ready")
             print("   ⚠️  Some minor components may need attention")
         else:
             print(f"\n🔴 SYSTEM STATUS: NEEDS WORK ({completeness:.1f}%)")
-            print("   🔧 Your DBX AI system needs more development")
+            print("   🔧 Our DBX AI system needs more development")
             print("   ❌ Some critical components are missing")
         
         if failed_tests > 0:
