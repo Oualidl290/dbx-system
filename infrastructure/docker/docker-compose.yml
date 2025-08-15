@@ -1,0 +1,54 @@
+
+# docker-compose.yml - Multi-Aircraft AI System v2.0
+# Note: version field is deprecated in newer Docker Compose
+
+services:
+  ai-engine:
+    build: 
+      context: .
+      dockerfile: ai-engine/Dockerfile
+    container_name: dbx-ai-engine
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ai-engine/app:/app/app
+      - ./data:/app/data
+      - model_cache:/app/data/models
+    environment:
+      - PYTHONPATH=/app
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - REDIS_URL=redis://redis:6379
+      - MODEL_VERSION=v2.0.0
+      - DEBUG=false
+      - LOG_LEVEL=INFO
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  redis:
+    image: redis:7-alpine
+    container_name: dbx-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+volumes:
+  redis_data:
+    driver: local
+  model_cache:
+    driver: local

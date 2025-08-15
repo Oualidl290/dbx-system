@@ -1,0 +1,22 @@
+
+database:
+  url: "${DATABASE_URL}"
+  echo: false
+  pool_size: 10
+
+redis:
+  url: "${REDIS_URL}"
+
+api:
+  debug: false
+  reload: false
+  workers: 2
+
+logging:
+  level: "INFO"
+  format: "json"
+
+security:
+  secret_key: "${SECRET_KEY}"
+  algorithm: "HS256"
+  access_token_expire_minutes: 30

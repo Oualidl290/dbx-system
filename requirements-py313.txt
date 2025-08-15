@@ -1,0 +1,30 @@
+# Python 3.13 Compatible Requirements for DBX AI System
+# Updated versions that work with Python 3.13
+
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+pandas>=2.2.0
+numpy>=1.26.0
+scikit-learn>=1.4.0
+xgboost>=2.0.3
+matplotlib>=3.8.0
+seaborn>=0.13.0
+plotly>=5.17.0
+python-multipart>=0.0.6
+aiofiles>=23.2.1
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+python-dotenv>=1.0.0
+jinja2>=3.1.2
+
+# Optional dependencies (may not be needed for basic functionality)
+# google-generativeai>=0.3.2
+# shap>=0.43.0
+# weasyprint>=60.2
+# celery[redis]>=5.3.4
+# redis>=4.5.2,<6.0.0
+# pymavlink>=2.4.37
+
+# Database dependencies
+psycopg2-binary>=2.9.0
+sqlalchemy>=2.0.0

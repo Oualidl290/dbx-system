@@ -1,0 +1,4 @@
+# Default Organization API Key
+# Use this for testing the API
+
+DBX_DEFAULT_API_KEY=dbx_NA59rWue2ocIkcV_8zYj9FjbMDq3FctVZepqUW8o7xM

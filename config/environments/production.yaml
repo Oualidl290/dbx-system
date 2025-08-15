@@ -1,0 +1,27 @@
+
+database:
+  url: "${DATABASE_URL}"
+  echo: false
+  pool_size: 20
+  max_overflow: 40
+
+redis:
+  url: "${REDIS_URL}"
+
+api:
+  debug: false
+  reload: false
+  workers: 4
+
+logging:
+  level: "INFO"
+  format: "json"
+
+security:
+  secret_key: "${SECRET_KEY}"
+  algorithm: "HS256"
+  access_token_expire_minutes: 15
+
+monitoring:
+  prometheus_enabled: true
+  health_check_interval: 30

@@ -1,27 +1,38 @@
-# DBX AI System - Production Docker Compose
-# Optimized for sharing and production deployment
-
-version: '3.8'
+# DBX AI Aviation System v2.0 - Production Docker Compose
+# Enterprise-grade deployment with PostgreSQL, Redis, and monitoring
 
 services:
-  # Main AI Engine
+  # Main AI Engine - Production Ready
   dbx-ai-engine:
-    image: oualidl290/dbx-ai-system:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_DATE: ${BUILD_DATE:-}
+        VERSION: "2.0.0"
+        VCS_REF: ${VCS_REF:-}
+    image: oualidl290/dbx-ai-system:v2.0.0
     container_name: dbx-ai-engine
     restart: unless-stopped
     ports:
       - "8000:8000"
     environment:
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://dbx_api_service:${DB_PASSWORD}@dbx-postgres:5432/dbx_aviation}
       - REDIS_URL=redis://dbx-redis:6379
       - MODEL_VERSION=2.0.0
-      - WORKERS=2
+      - WORKERS=4
       - LOG_LEVEL=INFO
+      - DEBUG=false
     volumes:
       - ai_data:/app/data
       - ai_reports:/app/reports
+      - ai_config:/app/config
     depends_on:
-      - dbx-redis
+      dbx-postgres:
+        condition: service_healthy
+      dbx-redis:
+        condition: service_healthy
     networks:
       - dbx-network
     healthcheck:
@@ -29,7 +40,40 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 90s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 1G
+          cpus: '1.0'
+
+  # PostgreSQL Database - Production
+  dbx-postgres:
+    image: postgres:15-alpine
+    container_name: dbx-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=dbx_aviation
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-secure_password_change_me}
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --locale=C
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - postgres_backups:/backups
+      - ./src/database/init_database.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    networks:
+      - dbx-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dbx_aviation"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     deploy:
       resources:
         limits:
@@ -39,7 +83,7 @@ services:
           memory: 512M
           cpus: '0.5'
 
-  # Redis Cache
+  # Redis Cache - Production
   dbx-redis:
     image: redis:7-alpine
     container_name: dbx-redis
@@ -50,7 +94,7 @@ services:
       - redis_data:/data
     networks:
       - dbx-network
-    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 30s
@@ -59,10 +103,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 512M
           cpus: '0.5'
 
-  # Nginx Reverse Proxy (Optional for production)
+  # Nginx Reverse Proxy - Production
   dbx-nginx:
     image: nginx:alpine
     container_name: dbx-nginx
@@ -71,8 +115,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/nginx/ssl:ro
+      - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infrastructure/nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
       - dbx-ai-engine
     networks:
@@ -80,16 +124,66 @@ services:
     profiles:
       - production
 
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: dbx-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - dbx-network
+    profiles:
+      - monitoring
+
+  # Grafana Dashboard
+  grafana:
+    image: grafana/grafana:latest
+    container_name: dbx-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infrastructure/monitoring/grafana:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    networks:
+      - dbx-network
+    profiles:
+      - monitoring
+
 # Named volumes for data persistence
 volumes:
+  postgres_data:
+    driver: local
+  postgres_backups:
+    driver: local
+  redis_data:
+    driver: local
   ai_data:
     driver: local
   ai_reports:
     driver: local
-  redis_data:
+  ai_config:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
     driver: local
 
-# Custom network
+# Production network
 networks:
   dbx-network:
     driver: bridge

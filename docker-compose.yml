@@ -1,38 +1,75 @@
 
-# docker-compose.yml - Multi-Aircraft AI System v2.0
-version: '3.8'
+# DBX AI Aviation System v2.0 - Development Docker Compose
+# Updated for latest production architecture
 
 services:
-  ai-engine:
+  # Main AI Engine with latest architecture
+  dbx-ai-engine:
     build: 
-      context: ./ai-engine
+      context: .
       dockerfile: Dockerfile
+      args:
+        BUILD_DATE: ${BUILD_DATE:-}
+        VERSION: "2.0.0"
+        VCS_REF: ${VCS_REF:-}
     container_name: dbx-ai-engine
     ports:
       - "8000:8000"
     volumes:
-      - ./ai-engine/app:/app/app
+      - ./app:/app/app:ro  # Read-only for security
       - ./data:/app/data
+      - ./reports:/app/reports
       - model_cache:/app/data/models
     environment:
       - PYTHONPATH=/app
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - REDIS_URL=redis://redis:6379
-      - MODEL_VERSION=v2.0.0
-      - DEBUG=false
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:password@postgres:5432/dbx_aviation}
+      - REDIS_URL=redis://dbx-redis:6379
+      - MODEL_VERSION=2.0.0
+      - DEBUG=true
       - LOG_LEVEL=INFO
+      - WORKERS=1
     depends_on:
-      redis:
+      dbx-redis:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - dbx-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
 
-  redis:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: dbx-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=dbx_aviation
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/database/init_database.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    restart: unless-stopped
+    networks:
+      - dbx-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dbx_aviation"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Redis Cache
+  dbx-redis:
     image: redis:7-alpine
     container_name: dbx-redis
     ports:
@@ -40,15 +77,48 @@ services:
     volumes:
       - redis_data:/data
     restart: unless-stopped
+    networks:
+      - dbx-network
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 3s
       retries: 3
-    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+  # Prometheus Monitoring (Optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: dbx-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    restart: unless-stopped
+    networks:
+      - dbx-network
+    profiles:
+      - monitoring
 
 volumes:
+  postgres_data:
+    driver: local
   redis_data:
     driver: local
   model_cache:
     driver: local
+  prometheus_data:
+    driver: local
+
+networks:
+  dbx-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

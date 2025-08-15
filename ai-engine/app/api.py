@@ -17,6 +17,13 @@ from .models.multi_aircraft_detector import MultiAircraftAnomalyDetector
 from .models.shap_explainer import SHAPExplainer
 from .models.aircraft_detector import AircraftType
 from .services.report_generator import ReportGenerator
+from .database import (
+    get_db, db_manager, get_default_org_id,
+    create_flight_session, save_analysis_result, 
+    get_or_create_aircraft, get_recent_analyses
+)
+from sqlalchemy.orm import Session
+from fastapi import Depends
 
 app = FastAPI(title="DBX AI Engine", version="2.0.0", description="Smart Multi-Aircraft Drone Log Analysis System")
 
@@ -46,9 +53,45 @@ async def root():
             "Aircraft-specific anomaly detection", 
             "Flight phase analysis",
             "Comprehensive performance metrics",
-            "AI-powered reporting with Gemini"
+            "AI-powered reporting with Gemini",
+            "Production PostgreSQL database integration"
         ]
     }
+
+@app.get("/api/v2/system/database-status")
+async def database_status():
+    """Check database connectivity and stats - IMMEDIATE INTEGRATION"""
+    try:
+        health = db_manager.health_check()
+        return {
+            "database_status": health["status"],
+            "database_info": health,
+            "integration_status": "CONNECTED" if health["status"] == "healthy" else "DISCONNECTED"
+        }
+    except Exception as e:
+        return {
+            "database_status": "error",
+            "error": str(e),
+            "integration_status": "FAILED"
+        }
+
+@app.get("/api/v2/analyses/recent")
+async def get_recent_analyses(db: Session = Depends(get_db)):
+    """Get recent analysis results from database - IMMEDIATE INTEGRATION"""
+    try:
+        org_id = get_default_org_id()
+        if not org_id:
+            raise HTTPException(status_code=500, detail="Default organization not found")
+        
+        analyses = get_recent_analyses(db, org_id, limit=10)
+        return {
+            "status": "success",
+            "count": len(analyses),
+            "analyses": analyses,
+            "source": "postgresql_database"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 @app.get("/health")
 async def health_check():
