@@ -85,6 +85,7 @@ RUN mkdir -p /app/data/{models,cache,logs,temp,uploads,results} && \
 
 # Copy application code with proper structure
 COPY --chown=dbx:dbx app/ ./app/
+COPY --chown=dbx:dbx ai-engine/ ./ai-engine/
 COPY --chown=dbx:dbx main.py ./
 COPY --chown=dbx:dbx pyproject.toml ./
 
@@ -104,4 +105,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 EXPOSE 8000
 
 # Use exec form for better signal handling
-CMD ["sh", "-c", "python main.py --host 0.0.0.0 --port 8000 --workers ${WORKERS}"]
+CMD ["python", "main.py"]

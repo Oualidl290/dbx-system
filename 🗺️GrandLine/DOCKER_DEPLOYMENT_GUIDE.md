@@ -412,4 +412,4 @@ Your Docker setup is **enterprise-grade** and ready for:
 
 ---
 
-*For technical support with Docker deployment, refer to the troubleshooting section or contact the development team.*
+*For technical support with Docker deployment, refer to the troubleshooting section or contact the development
