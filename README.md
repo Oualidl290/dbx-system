@@ -1,3 +1,14 @@
+<div align="center">
+
+![DBX Logo](https://img.shields.io/badge/DBX_Platform-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-2.0.0-green?style=for-the-badge)
+![License](https://img.shields.io/badge/license-MIT-orange?style=for-the-badge)
+
+**Transform Content Creation into an Automated Revenue-Generating Machine**
+
+[🚀 Quick Start](#-quick-start) • [📚 Documentation](#-documentation) • [🏗️ Architecture](#-architecture) • [💻 Development](#-development) • [🤝 Contributing](#-contributing)
+
+</div>
 # 🚀 DBX AI Aviation System v2.0 - Refactored Structure
 
 **Production-ready multi-aircraft AI analysis system with clean, professional architecture**
