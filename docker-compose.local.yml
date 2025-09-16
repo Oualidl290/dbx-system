@@ -1,0 +1,162 @@
+# DBX AI Aviation System - Local Development Environment
+# Complete setup with PostgreSQL, Redis, and the application
+
+services:
+  # PostgreSQL Database
+  dbx-postgres:
+    image: postgres:15-alpine
+    container_name: dbx-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: dbx_aviation
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=en_US.UTF-8 --lc-ctype=en_US.UTF-8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/database/migrations:/docker-entrypoint-initdb.d:ro
+    networks:
+      - dbx-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dbx_aviation"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Redis Cache
+  dbx-redis:
+    image: redis:7-alpine
+    container_name: dbx-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - dbx-network
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # DBX AI Application
+  dbx-app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.local
+    container_name: dbx-app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      # Database Configuration
+      DATABASE_URL: postgresql://dbx_app_user:dbx_secure_2025@dbx-postgres:5432/dbx_aviation
+      DB_HOST: dbx-postgres
+      DB_PORT: 5432
+      DB_NAME: dbx_aviation
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_APP_USER: dbx_app_user
+      DB_APP_PASSWORD: dbx_secure_2025
+      
+      # Redis Configuration
+      REDIS_URL: redis://dbx-redis:6379
+      
+      # Application Configuration
+      ENVIRONMENT: development
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      API_DEBUG: true
+      API_RELOAD: true
+      LOG_LEVEL: DEBUG
+      
+      # Security (development only)
+      SECRET_KEY: dev-secret-key-change-in-production
+      
+      # AI Configuration
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      MODEL_VERSION: 2.0.0
+      
+      # Python Configuration
+      PYTHONPATH: /app/src
+      PYTHONDONTWRITEBYTECODE: 1
+      PYTHONUNBUFFERED: 1
+    volumes:
+      - ./src:/app/src:ro
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - app_cache:/app/cache
+    depends_on:
+      dbx-postgres:
+        condition: service_healthy
+      dbx-redis:
+        condition: service_healthy
+    networks:
+      - dbx-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # pgAdmin for database management (optional)
+  dbx-pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: dbx-pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@dbx-ai.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./docker/pgadmin/servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      - dbx-postgres
+    networks:
+      - dbx-network
+    profiles:
+      - tools
+
+  # Redis Commander for Redis management (optional)
+  dbx-redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: dbx-redis-commander
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      REDIS_HOSTS: local:dbx-redis:6379
+    depends_on:
+      - dbx-redis
+    networks:
+      - dbx-network
+    profiles:
+      - tools
+
+# Named volumes for data persistence
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  app_cache:
+    driver: local
+
+# Custom network
+networks:
+  dbx-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16

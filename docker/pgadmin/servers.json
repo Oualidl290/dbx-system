@@ -1,0 +1,15 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "DBX Aviation Database",
+            "Group": "Servers",
+            "Host": "dbx-postgres",
+            "Port": 5432,
+            "MaintenanceDB": "dbx_aviation",
+            "Username": "postgres",
+            "Password": "password",
+            "SSLMode": "prefer",
+            "Comment": "DBX AI Aviation System Database"
+        }
+    }
+}
