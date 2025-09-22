@@ -1,7 +1,7 @@
 <div align="center">
 
 ![DBX Logo](https://img.shields.io/badge/DBX_Platform-blue?style=for-the-badge)
-![Version](https://img.shields.io/badge/version-2.0.0-green?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-2.1.0-green?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-MIT-orange?style=for-the-badge)
 
 
