@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 
 # Import from new structure
 try:
+    # Try relative imports first
     from ...core.ai.aircraft_detector import AircraftType
     from ...core.ai.model import AnomalyDetector
     from ...core.ai.multi_aircraft_detector import MultiAircraftAnomalyDetector
@@ -26,6 +27,26 @@ try:
     from ...core.services.report_generator import ReportGenerator
     from ...database.connection import EnhancedDatabaseManager
     from ...config.settings import get_settings
+    print("✅ Successfully imported from new refactored structure")
+except ImportError as e:
+    print(f"⚠️ Relative import failed: {e}, trying absolute imports...")
+    try:
+        # Fallback to absolute imports
+        import sys
+        from pathlib import Path
+        sys.path.append(str(Path(__file__).parent.parent.parent))
+        
+        from core.ai.aircraft_detector import AircraftType
+        from core.ai.model import AnomalyDetector
+        from core.ai.multi_aircraft_detector import MultiAircraftAnomalyDetector
+        from core.ai.shap_explainer import SHAPExplainer
+        from core.services.parser import LogParser
+        from core.services.report_generator import ReportGenerator
+        from database.connection import EnhancedDatabaseManager
+        from config.settings import get_settings
+        print("✅ Successfully imported using absolute imports")
+    except ImportError as e2:
+        print(f"❌ Both import methods failed: {e2}")
     
     # Create database dependency
     def get_db():
@@ -169,11 +190,22 @@ async def analyze_flight_data(
         # Parse the flight data
         parsed_data = parser.parse(content.decode('utf-8'))
         
-        # Multi-aircraft detection
-        aircraft_result = multi_aircraft_detector.detect(parsed_data)
+        # Multi-aircraft detection and analysis
+        comprehensive_result = multi_aircraft_detector.analyze_flight_log(parsed_data)
         
-        # Anomaly detection
-        anomaly_result = detector.detect(parsed_data)
+        # Extract aircraft detection results
+        aircraft_result = {
+            'aircraft_type': comprehensive_result.get('aircraft_type', 'unknown'),
+            'confidence': comprehensive_result.get('aircraft_confidence', 0.0)
+        }
+        
+        # Extract anomaly detection results
+        anomaly_result = {
+            'anomaly': comprehensive_result.get('risk_score', 0.0) > 0.5,
+            'risk_level': comprehensive_result.get('risk_level', 'low'),
+            'anomaly_count': len(comprehensive_result.get('anomalies', [])),
+            'anomalies': comprehensive_result.get('anomalies', [])
+        }
         
         # SHAP explanation
         explanation = explainer.explain(parsed_data)

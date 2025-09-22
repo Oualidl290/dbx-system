@@ -15,6 +15,12 @@ class MultiAircraftAnomalyDetector:
         self.models = {}
         self.scalers = {}
         self._initialize_models()
+        # Train models on initialization
+        try:
+            self.train_models()
+            self.logger.info("Multi-aircraft models trained successfully")
+        except Exception as e:
+            self.logger.warning(f"Model training failed: {e}, using fallback behavior")
     
     def _initialize_models(self):
         """Initialize specialized models for each aircraft type"""
@@ -248,6 +254,14 @@ class MultiAircraftAnomalyDetector:
             X_scaled = self.scalers[aircraft_type].fit_transform(X)
             self.models[aircraft_type].fit(X_scaled, y)
             self.logger.info(f"{aircraft_type.value} model training completed")
+    
+    def detect(self, df: pd.DataFrame) -> Dict:
+        """Backward compatibility method - calls analyze_flight_log"""
+        result = self.analyze_flight_log(df)
+        return {
+            'aircraft_type': result.get('aircraft_type', 'unknown'),
+            'confidence': result.get('aircraft_confidence', 0.0)
+        }
     
     def analyze_flight_log(self, df: pd.DataFrame) -> Dict:
         """Comprehensive flight log analysis with aircraft type detection"""
